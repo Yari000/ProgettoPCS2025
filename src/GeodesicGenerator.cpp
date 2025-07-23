@@ -12,7 +12,7 @@
 
 namespace PolygonalLibrary {
 
-    PolygonalMesh generateGeodesicMesh(unsigned int p, unsigned int q, unsigned int b, unsigned int startv, unsigned int endv) {
+    PolygonalMesh generateGeodesicMesh(unsigned int p, unsigned int q, unsigned int b) {
 
         // genera la mesh basata sui solidi platonici di base
         PolygonalMesh mesh;
@@ -26,13 +26,13 @@ namespace PolygonalLibrary {
 		std::vector<std::vector<unsigned>> otris; // facce della mesh dopo la suddivisione
 
 
-        if (q == 5 or p == 5) {
+        if (q==5 or p==5) {
             generateIcosahedron(verts, tris);
         }
-        else if (q == 3) {
+        else if (q==3 and p==3) {
             generateTetrahedron(verts, tris);
         }
-        else if (q == 4 or p == 4) {
+        else if (q==4 or p==4) {
             generateOctahedron(verts, tris);
         }
         else {
@@ -51,18 +51,8 @@ namespace PolygonalLibrary {
             std::vector<std::vector<unsigned>> dualFaces;
             computeDualMesh(overts, otris, dualVerts, dualFaces);
 
-            std::vector<std::array<unsigned, 3>> dualTris;
-            
-            for (const auto& face : dualFaces) {
-                if (face.size() < 3) continue;
-
-				// crea triangoli dal vertice centrale della faccia e i suoi vertici
-                for (unsigned i=1;i+1<face.size();++i) {
-                    dualTris.push_back({ face[0], face[i], face[i + 1] });
-				}
-
-                overts = dualVerts;
-				otris = dualFaces;
+            overts = dualVerts;
+	    otris = dualFaces;
             }
         }
         
@@ -77,6 +67,8 @@ namespace PolygonalLibrary {
         
 
         // assegnazione dei dati alla structure della mesh
+
+        //Cell0Ds
         mesh.NumCell0Ds = overts.size();
         mesh.Cell0DsCoordinates.resize(mesh.NumCell0Ds, 3);
         for (unsigned i = 0; i < overts.size(); ++i) {
@@ -84,11 +76,11 @@ namespace PolygonalLibrary {
             mesh.Cell0DsId.push_back(i);
         }
         
-
+        //Cell2Ds
         mesh.NumCell2Ds = otris.size();
         mesh.Cell2DsId.resize(otris.size());
-		mesh.NumVerticesPerCell2D.resize(otris.size());
-		mesh.NumEdgesPerCell2D.resize(otris.size());
+        mesh.NumVerticesPerCell2D.resize(otris.size());
+	mesh.NumEdgesPerCell2D.resize(otris.size());
         mesh.Cell2DsVertices.resize(otris.size());
         for (unsigned i = 0; i < otris.size(); ++i) {
             const auto& face = otris[i];
@@ -103,21 +95,22 @@ namespace PolygonalLibrary {
         mesh.NumVertices = mesh.NumCell0Ds;
         mesh.NumFaces = mesh.NumCell2Ds;
 
-        mesh.NumCell3Ds = 1;
-        mesh.Cell3DsId = { 0 };
+        mesh.NumCell3Ds= 1;
+        mesh.Cell3DsId= {0};
         mesh.Cell3DsVertices.resize(1);
-		mesh.Cell3DsEdges.resize(1);
-		mesh.Cell3DsFaces.resize(1);
+	mesh.Cell3DsEdges.resize(1);
+	mesh.Cell3DsFaces.resize(1);
 
         for (unsigned i = 0; i < mesh.NumCell0Ds; ++i) {
             mesh.Cell3DsVertices[0].push_back(i);
 		}
-
+        
+        // Cell1Ds
         std::map<std::pair<unsigned, unsigned>, unsigned> edgeMap;
         mesh.Cell1DsId.clear();
-		mesh.Cell1DsExtrema.resize(0, 2);
+	mesh.Cell1DsExtrema.resize(0, 2);
 
-		unsigned edgeCount = 0;
+	unsigned edgeCount= 0;
         for (unsigned f = 0; f < otris.size(); ++f) {
             const auto& face = otris[f];
             std::vector<unsigned> edgeIds;
@@ -147,11 +140,7 @@ namespace PolygonalLibrary {
 		mesh.NumEdges = mesh.NumCell1Ds;
 
 		
-
-
-
-
-        for (unsigned i = 0; i < mesh.NumCell1Ds; ++i) {
+                for (unsigned i = 0; i < mesh.NumCell1Ds; ++i) {
 			mesh.Cell3DsEdges[0].push_back(i);
 		}
 		for (unsigned i = 0; i < mesh.NumCell2Ds; ++i) {
