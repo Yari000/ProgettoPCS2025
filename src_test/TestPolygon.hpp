@@ -70,11 +70,120 @@ namespace PolygonalLibrary {
 	TEST(TestGeometry, TestVerticesNormalization)   // test correttezza normalizzazione
 	{
 		PolygonalMesh mesh = generateGeodesicMesh(3, 5, 5);
-		for (unsigned i = 0; i < mesh.NumVertices; ++i) {
+		for (unsigned i=0; i< mesh.NumVertices; ++i) {
 			Eigen::Vector3d v = mesh.Cell0DsCoordinates.row(i);
 			double vnorm = v.norm();
 			EXPECT_NEAR(vnorm, 1.0, 1e-5);
 		}
 	}
 
+
+        	TEST(TestGeometry, EdgeConnection) {     //ogni lato ha esattamente 2 vertici distinti
+		PolygonalMesh mesh = generateGeodesicMesh(3, 4, 5);
+		for (unsigned i = 0; i < mesh.NumEdges; ++i) {
+			unsigned v1 = mesh.Cell1DsExtrema(i, 0);
+			unsigned v2 = mesh.Cell1DsExtrema(i, 1);
+			EXPECT_LT(v1, mesh.NumVertices);
+			EXPECT_LT(v2, mesh.NumVertices);
+			EXPECT_NE(v1, v2);
+		}
+	}
+
+	TEST(TestGeometry, ZeroPath) {    //test percorso nullo
+		PolygonalMesh mesh = generateGeodesicMesh(5, 3, 2);
+	std::vector<bool> vertexOnPath, edgeOnPath;
+		double len = 0.0;
+		unsigned int numedge = 0;
+		PolygonalLibrary::computeShortestPath(mesh, 2, 2, vertexOnPath, edgeOnPath, len, numedge);
+		EXPECT_EQ(len, 0.0);
+		EXPECT_EQ(numedge, 0);
+		EXPECT_TRUE(vertexOnPath[2]);
+	}
+
+	static std::vector<unsigned> vertexVal(const PolygonalMesh& mesh) {
+		std::vector<unsigned> valences(mesh.NumVertices, 0);
+		for (unsigned e = 0; e < mesh.NumEdges; ++e) {
+			unsigned v1 = mesh.Cell1DsExtrema(e, 0);
+			unsigned v2 = mesh.Cell1DsExtrema(e, 1);
+			if (v1 < mesh.NumVertices && v2 < mesh.NumVertices) {
+				valences[v1]++;
+				valences[v2]++;
+			}
+		}
+		return valences;
+	}
+
+	TEST(TestGeometry, VertexValence) {
+		struct Case { unsigned int q; unsigned int specCount; unsigned int specVal; };
+		std::vector<Case> cases = {
+			{3, 4, 3},   // tetraedro
+			{4, 6, 4},   // ottaedro
+			{5, 12, 5}   // icosaedro
+		};
+
+		unsigned int b = 3;
+		unsigned int p = 3;
+
+		for (const auto& c : cases) {
+			PolygonalMesh mesh = generateGeodesicMesh(p, c.q, b);
+			auto valences = vertexVal(mesh);
+
+			unsigned total = mesh.NumVertices;
+			unsigned exspecial = c.specCount;
+			unsigned exregular = total - exspecial;
+			unsigned countSpecial = std::count(valences.begin(), valences.end(), c.specVal);
+			unsigned countRegular = std::count(valences.begin(), valences.end(), 6u);
+
+			EXPECT_EQ(countSpecial, exspecial) << "Errore nel numero di vertici 'speciali' per q=" << c.q;
+			EXPECT_EQ(countRegular, exregular) << "Errore nel numero di vertici 'regolari' per q=" << c.q;
+
+			for (unsigned v : valences) {
+				EXPECT_TRUE(v == c.specVal || v == 6u) << "Valenza non valida: " << v << " per q=" << c.q;
+			}
+		}
+	}
+
+	TEST(TestGeometry, FaceConsistency) {
+		PolygonalMesh mesh = generateGeodesicMesh(3, 5, 3);
+
+		std::map<std::pair<unsigned, unsigned>, unsigned int> edgefacecount;
+
+		for (unsigned int f=0; f< mesh.NumFaces; ++f) {
+			const auto& verts =mesh.Cell2DsVertices[f];
+			const auto& edges =mesh.Cell2DsEdges[f];
+
+			EXPECT_EQ(verts.size(), edges.size()) << "Numero di vertici e lati non corrispondono nella faccia " << f;
+
+			unsigned n = verts.size();
+			for (unsigned int i=0; i< n; ++i) {
+				unsigned v1 =verts[i];
+				unsigned v2 =verts[(i + 1) % n];
+				bool found =false;
+				for (unsigned edgeId : edges) {
+					unsigned int a=mesh.Cell1DsExtrema(edgeId, 0);
+					unsigned int b =mesh.Cell1DsExtrema(edgeId, 1);
+					if ((a == v1 && b == v2) || (a == v2 && b == v1)) {
+						found = true;
+						break;
+					}
+				}
+				EXPECT_TRUE(found) << "Lato non trovato per vertici " << v1 << " e " << v2 << " nella faccia " << f;
+			}
+
+			for (unsigned j = 0; j < n; ++j) {
+				unsigned v1 = std::min(verts[j], verts[(j + 1) % n]);
+				unsigned v2 = std::max(verts[j], verts[(j + 1) % n]);
+				edgefacecount[{v1, v2}]++;
+			}
+		}
+
+		for (auto& k : edgefacecount) {
+			EXPECT_LE(k.second, 2u) << "Lato " << k.first.first << "-" << k.first.second << " appare in più di due facce (impossibile)";
+		}
+	}
+
 }
+
+
+
+

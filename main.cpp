@@ -102,7 +102,41 @@ for (unsigned int i = 0; i < mesh.NumCell3Ds; ++i) {
         }
     }
     meshout << "\n";
+
 }
+
+   Gedim::UCDUtilities utilities;
+
+{
+    vector<Gedim::UCDProperty<double>> Cell0Ds_properties(1);
+    Cell0Ds_properties[0].Label ="ShortestPath";
+    Cell0Ds_properties[0].UnitLabel ="-";
+    Cell0Ds_properties[0] =NumComponents =1;
+
+    vector<double> shortest_path_marker =VertexOnPath;
+    assert(shortest_path_marker.size() ==mesh.NumVertices);
+
+	Cell0Ds_properties[0].Data =shortest_path_marker.data();
+
+    utilities.ExportPoints("./Cell0Ds.inp", mesh.Cell0DsCoordinates, Cell0Ds_properties);
+}
+{
+    vector<Gedim::UCDProperty<double>> Cell1Ds_properties(1);
+    Cell1Ds_properties[0].Label ="ShortestPath";
+    Cell1Ds_properties[0].UnitLabel ="-";
+    Cell1Ds_properties[0].Size =mesh.NumEdges;
+    Cell1Ds_properties[0].NumComponents =1;
+    vector<double> shortest_path_marker(mesh.NumEdges, 0.0);
+    for (unsigned i=0; i< mesh.NumEdges; ++i) {
+        if (EdgeOnPath[i]) {
+            shortest_path_marker[i]=1.0;
+        }
+	}
+
+	utilities.ExportLines("./Cell1Ds.inp",mesh.Cell1DsExtrema, Cell1Ds_properties);
+
+}
+  
 
     
 
