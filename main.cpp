@@ -113,31 +113,40 @@ for (unsigned int i = 0; i < mesh.NumCell3Ds; ++i) {
     Cell0Ds_properties[0].UnitLabel ="-";
     Cell0Ds_properties[0] =NumComponents =1;
 
-    vector<double> shortest_path_marker =VertexOnPath;
-    assert(shortest_path_marker.size() ==mesh.NumVertices);
+    vector<double> shortest_path_marker(mesh.NumVertices,0);
+    for (unsigned i = 0; i < mesh.NumVertices; ++i)
+    shortest_path_marker[i] = Vertonpath[i] ? 1.0 : 0.0;
 
-	Cell0Ds_properties[0].Data =shortest_path_marker.data();
-
-    utilities.ExportPoints("./Cell0Ds.inp", mesh.Cell0DsCoordinates, Cell0Ds_properties);
-}
-{
-    vector<Gedim::UCDProperty<double>> Cell1Ds_properties(1);
-    Cell1Ds_properties[0].Label ="ShortestPath";
-    Cell1Ds_properties[0].UnitLabel ="-";
-    Cell1Ds_properties[0].Size =mesh.NumEdges;
-    Cell1Ds_properties[0].NumComponents =1;
-    vector<double> shortest_path_marker(mesh.NumEdges, 0.0);
-    for (unsigned i=0; i< mesh.NumEdges; ++i) {
-        if (EdgeOnPath[i]) {
-            shortest_path_marker[i]=1.0;
-        }
-	}
-
-	utilities.ExportLines("./Cell1Ds.inp",mesh.Cell1DsExtrema, Cell1Ds_properties);
-
+    Cell0Ds_properties[0].Data =shortest_path_marker.data();
+    Eigen::VectorXi materials = Eigen::VectorXi::Zero(mesh.NumVertices);
+    utilities.ExportPoints("./Cell0Ds.inp", mesh.Cell0DsCoordinates.transpose(), Cell0Ds_properties,materials);
 }
   
+{
+    vector<Gedim::UCDProperty<double>> Cell0Ds_properties(1);
+    Cell0Ds_properties[0].Label = "ShortestPath";
+    Cell0Ds_properties[0].UnitLabel = "-";
+    Cell0Ds_properties[0].NumComponents = 1;
+    vector<double> vertex_marker(mesh.NumVertices, 0.0);
+    for (unsigned i = 0; i < mesh.NumVertices; ++i) {
+        vertex_marker[i] = Vertonpath[i] ? 1.0 : 0.0;
+    }
+    Cell0Ds_properties[0].Data = vertex_marker.data();
+    vector<Gedim::UCDProperty<double>> Cell1Ds_properties(1);
+    Cell1Ds_properties[0].Label = "ShortestPath";
+    Cell1Ds_properties[0].UnitLabel = "-";
+    Cell1Ds_properties[0].NumComponents = 1;
+    vector<double> edge_marker(mesh.NumEdges, 0.0);
+    for (unsigned i = 0; i < mesh.NumEdges; ++i) {
+        edge_marker[i] = Edgeonpath[i] ? 1.0 : 0.0;
+    }
 
+    Cell1Ds_properties[0].Data = edge_marker.data();
+    Eigen::VectorXi materials = Eigen::VectorXi::Zero(mesh.NumEdges);
+
+    utilities.ExportSegments("./Cell1Ds.inp", mesh.Cell0DsCoordinates.transpose(), mesh.Cell1DsExtrema.transpose(), Cell0Ds_properties, Cell1Ds_properties, materials);
+
+}
     
 
     }

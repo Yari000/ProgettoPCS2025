@@ -3,6 +3,7 @@
 #include <cmath>
 #include <algorithm>
 #include "Eigen/Dense"
+#include <limits>
 
 
 // funzione che genera il tetraedro
@@ -10,16 +11,16 @@ void generateTetrahedron(std::vector<Eigen::Vector3d>& verts, std::vector<std::a
     verts.clear();
     tris.clear();
 
-    //double sqrt2 = std::sqrt(2.0);
-    verts.push_back(Eigen::Vector3d(1, 1, 1));
-    verts.push_back(Eigen::Vector3d(-1, -1, 1));
-    verts.push_back(Eigen::Vector3d(-1, 1, -1));
-    verts.push_back(Eigen::Vector3d(1, -1, -1));
+    
+    verts.push_back(Eigen::Vector3d(1,1,1));
+    verts.push_back(Eigen::Vector3d(-1,-1,1));
+    verts.push_back(Eigen::Vector3d(-1,1,-1));
+    verts.push_back(Eigen::Vector3d(1,-1,-1));
 
-    tris.push_back({ 0, 1, 2 });
-    tris.push_back({ 0, 3, 1 });
-    tris.push_back({ 0, 2, 3 });
-    tris.push_back({ 1, 3, 2 });
+    tris.push_back({0,1,2});
+    tris.push_back({0,3,1});
+    tris.push_back({0,2,3});
+    tris.push_back({1,3,2});
 }
 
 // funzione che genera l'ottedro
@@ -27,22 +28,22 @@ void generateOctahedron(std::vector<Eigen::Vector3d>& verts, std::vector<std::ar
     verts.clear();
     tris.clear();
 
-    verts.push_back(Eigen::Vector3d(1, 0, 0));   // 0
-    verts.push_back(Eigen::Vector3d(-1, 0, 0));  // 1
-    verts.push_back(Eigen::Vector3d(0, 1, 0));   // 2
-    verts.push_back(Eigen::Vector3d(0, -1, 0));  // 3
-    verts.push_back(Eigen::Vector3d(0, 0, 1));   // 4
-    verts.push_back(Eigen::Vector3d(0, 0, -1));  // 5
+    verts.push_back(Eigen::Vector3d(1,0,0));   
+    verts.push_back(Eigen::Vector3d(-1,0,0));  
+    verts.push_back(Eigen::Vector3d(0,1,0));   
+    verts.push_back(Eigen::Vector3d(0,-1,0));  
+    verts.push_back(Eigen::Vector3d(0,0,1));   
+    verts.push_back(Eigen::Vector3d(0,0,-1));  
 
-    tris.push_back({ 0, 2, 4 });
-    tris.push_back({ 2, 1, 4 });
-    tris.push_back({ 1, 3, 4 });
-    tris.push_back({ 3, 0, 4 });
+    tris.push_back({0,2,4});
+    tris.push_back({2,1,4});
+    tris.push_back({1,3,4});
+    tris.push_back({3,0,4});
 
-    tris.push_back({ 2, 0, 5 });
-    tris.push_back({ 1, 2, 5 });
-    tris.push_back({ 3, 1, 5 });
-    tris.push_back({ 0, 3, 5 });
+    tris.push_back({2,0,5});
+    tris.push_back({1,2,5});
+    tris.push_back({3,1,5});
+    tris.push_back({0,3,5});
 }
 
 // funzione che genera l'icosaedro
@@ -82,9 +83,9 @@ void subdivideOnce_T(
     for (int i = 0; i <= b; ++i) {
         vertGrid[i].resize(i + 1);
         for (int j = 0; j <= i; ++j) {
-            double u = 1.0 - (double)i / b;
-            double v = (double)(i - j) / b;
-            double w = (double)j / b;
+            double u =1.0 - (double)i / b;
+            double v =(double)(i-j) / b;
+            double w =(double)j/b;
 
             Eigen::Vector3d P = u * A + v * B + w * C;
             P.normalize();  // Proietta su sfera unitaria

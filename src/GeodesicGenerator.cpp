@@ -91,7 +91,7 @@ namespace PolygonalLibrary {
         }
             
             
-
+        //Cell3Ds
         mesh.NumVertices = mesh.NumCell0Ds;
         mesh.NumFaces = mesh.NumCell2Ds;
 

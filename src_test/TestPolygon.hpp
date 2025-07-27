@@ -14,23 +14,23 @@
 
 namespace PolygonalLibrary {
 
-	TEST(TestGeometry, TestNumDual)   // test numerosità nel duale
+	TEST(TestGeometry,TestNumDual)   // test numerosità nel duale
 	{
 		unsigned q = 3;   
-		array p = { 4,5 };
-		array b = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+		array p = {4,5};
+		array b = {1,2,3,4,5,6,7,8,9,10};
 		for (unsigned b_val : b) {
 			for (unsigned p_val : p) {
-				PolygonalMesh mesh = generateGeodesicMesh(p_val, q, b_val);
+				PolygonalMesh mesh =generateGeodesicMesh(p_val,q,b_val);
 				if (p_val == 4) {
-					EXPECT_EQ(mesh.NumVertices, 8*b_val*b_val);
-					EXPECT_EQ(mesh.NumFaces, 4*b_val*b_val +2);
-					EXPECT_EQ(mesh.NumEdges, 12*b_val*b_val);
+					EXPECT_EQ(mesh.NumVertices,8*b_val*b_val);
+					EXPECT_EQ(mesh.NumFaces,4*b_val*b_val +2);
+					EXPECT_EQ(mesh.NumEdges,12*b_val*b_val);
 				}
 				else {
-					EXPECT_EQ(mesh.NumVertices, 20*b_val*b_val);
-					EXPECT_EQ(mesh.NumFaces, 10*b_val*b_val +2);
-					EXPECT_EQ(mesh.NumEdges, 30*b_val*b_val);
+					EXPECT_EQ(mesh.NumVertices,20*b_val*b_val);
+					EXPECT_EQ(mesh.NumFaces,10*b_val*b_val +2);
+					EXPECT_EQ(mesh.NumEdges,30*b_val*b_val);
 				}
 				
 			}
@@ -40,14 +40,14 @@ namespace PolygonalLibrary {
 	}
 
 
-	TEST(TestGeometry, TestNum)  // test numerosità della mesh
+	TEST(TestGeometry,TestNum)  // test numerosità della mesh
 	{
-		unsigned p = 3;
-		array q = { 3,4,5 };
-		array b = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+		unsigned p =3;
+		array q = {3,4,5};
+		array b = {1,2,3, 4,5,6,7,8,9,10};
 		for (unsigned b_val : b) {
 			for (unsigned q_val : q) {
-				PolygonalMesh mesh = generateGeodesicMesh(p, q_val, b_val);
+				PolygonalMesh mesh =generateGeodesicMesh(p,q_val,b_val);
 				if (q_val == 3) {
 					EXPECT_EQ(mesh.NumVertices, 2*b_val*b_val +2);
 					EXPECT_EQ(mesh.NumFaces, 4*b_val*b_val );
@@ -59,15 +59,47 @@ namespace PolygonalLibrary {
 					EXPECT_EQ(mesh.NumEdges, 12 * b_val * b_val);
 				}
 				else if (q_val == 5) {
-					EXPECT_EQ(mesh.NumVertices, 10 * b_val * b_val +2);
-					EXPECT_EQ(mesh.NumFaces, 20 * b_val * b_val);
-					EXPECT_EQ(mesh.NumEdges, 30 * b_val * b_val);
+					EXPECT_EQ(mesh.NumVertices,10 * b_val * b_val +2);
+					EXPECT_EQ(mesh.NumFaces,20 * b_val * b_val);
+					EXPECT_EQ(mesh.NumEdges,30 * b_val * b_val);
 				}
 			}
 		}
 	}
 
-	TEST(TestGeometry, TestVerticesNormalization)   // test correttezza normalizzazione
+
+
+        TEST(TestGeometry, TestNum2)
+	{
+		unsigned p =3;
+        std::array q = {3,4,5};
+		std::array b = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+		for (unsigned b_val : b) {
+			for (unsigned q_val : q) {
+				unsigned T = 3*b_val*b_val;
+				PolygonalMesh mesh = generateGeodesicMesh(p, q_val, b_val, b_val);
+				if (q_val == 3) {
+					EXPECT_EQ(mesh.NumVertices, 2*T + 2) << "Errore per q=3, b=" << b_val;
+					EXPECT_EQ(mesh.NumFaces, 4*T);
+					EXPECT_EQ(mesh.NumEdges, 6*T);
+				}
+				else if (q_val==4) {
+					EXPECT_EQ(mesh.NumVertices, 4*T + 2) << "Errore per q=4, b=" << b_val;
+					EXPECT_EQ(mesh.NumFaces, 8*T);
+					EXPECT_EQ(mesh.NumEdges, 12*T);
+				}
+				else if (q_val==5) {
+					EXPECT_EQ(mesh.NumVertices,10*T+2) << "Errore per q=5, b=" << b_val;
+					EXPECT_EQ(mesh.NumFaces,20*T);
+					EXPECT_EQ(mesh.NumEdges,30*T);
+				}
+			}
+		}
+
+
+
+
+        TEST(TestGeometry, TestVerticesNormalization)   // test correttezza normalizzazione
 	{
 		PolygonalMesh mesh = generateGeodesicMesh(3, 5, 5);
 		for (unsigned i=0; i< mesh.NumVertices; ++i) {
@@ -79,13 +111,13 @@ namespace PolygonalLibrary {
 
 
         	TEST(TestGeometry, EdgeConnection) {     //ogni lato ha esattamente 2 vertici distinti
-		PolygonalMesh mesh = generateGeodesicMesh(3, 4, 5);
+		PolygonalMesh mesh = generateGeodesicMesh(3,4,5);
 		for (unsigned i = 0; i < mesh.NumEdges; ++i) {
 			unsigned v1 = mesh.Cell1DsExtrema(i, 0);
 			unsigned v2 = mesh.Cell1DsExtrema(i, 1);
 			EXPECT_LT(v1, mesh.NumVertices);
 			EXPECT_LT(v2, mesh.NumVertices);
-			EXPECT_NE(v1, v2);
+			EXPECT_NE(v1,v2);
 		}
 	}
 
@@ -94,17 +126,17 @@ namespace PolygonalLibrary {
 	std::vector<bool> vertexOnPath, edgeOnPath;
 		double len = 0.0;
 		unsigned int numedge = 0;
-		PolygonalLibrary::computeShortestPath(mesh, 2, 2, vertexOnPath, edgeOnPath, len, numedge);
-		EXPECT_EQ(len, 0.0);
+		PolygonalLibrary::computeShortestPath(mesh,2,2,vertexOnPath,edgeOnPath,len,numedge);
+		EXPECT_EQ(len,0.0);
 		EXPECT_EQ(numedge, 0);
 		EXPECT_TRUE(vertexOnPath[2]);
 	}
 
 	static std::vector<unsigned> vertexVal(const PolygonalMesh& mesh) {
 		std::vector<unsigned> valences(mesh.NumVertices, 0);
-		for (unsigned e = 0; e < mesh.NumEdges; ++e) {
-			unsigned v1 = mesh.Cell1DsExtrema(e, 0);
-			unsigned v2 = mesh.Cell1DsExtrema(e, 1);
+		for (unsigned e= 0; e< mesh.NumEdges; ++e) {
+			unsigned v1= mesh.Cell1DsExtrema(e, 0);
+			unsigned v2= mesh.Cell1DsExtrema(e, 1);
 			if (v1 < mesh.NumVertices && v2 < mesh.NumVertices) {
 				valences[v1]++;
 				valences[v2]++;
@@ -125,8 +157,8 @@ namespace PolygonalLibrary {
 		unsigned int p = 3;
 
 		for (const auto& c : cases) {
-			PolygonalMesh mesh = generateGeodesicMesh(p, c.q, b);
-			auto valences = vertexVal(mesh);
+			PolygonalMesh mesh =generateGeodesicMesh(p, c.q, b);
+			auto valences =vertexVal(mesh);
 
 			unsigned total = mesh.NumVertices;
 			unsigned exspecial = c.specCount;
