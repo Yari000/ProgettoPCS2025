@@ -14,7 +14,39 @@ using namespace PolygonalLibrary;
 
 
 int main() {
-    unsigned int p = 3, q = 4, b = 7, startv=2, endv=5;
+    unsigned int p, q, b, startv=0, endv=0;
+    unsigned int choice;
+cout << "selezione poliedro di partenza" << endl;
+cout << "1. Tetraedro" << endl;
+cout << "2. Ottaedro" << endl;
+cout << "3. Icosaedro" << endl;
+cout << "4. Cubo" << endl;
+cout << "5. Dodecaedro" << endl;
+cin >> choice;
+if (choice < 1 || choice > 5) {
+    std::cerr << "Scelta non valida. Uscita dal programma." << std::endl;
+    return 1;
+}
+if (choice == 1) {
+    p = 3; q = 3; 
+} else if (choice == 2) {
+    p = 3; q = 4; 
+} else if (choice == 3) {
+    p = 3; q = 5; 
+} else if (choice == 4) {
+	p = 4; q = 3; 
+    } else if (choice == 5) {
+    p = 5; q = 3; 
+	}
+
+	cout << "Inserisci il numero di suddivisioni b"<<endl;
+	cin >> b;
+	cout << "Inserisci il numero di suddivisioni c"<<endl;
+	cin >> c;
+	cout << "Inserisci il vertice di partenza"<<endl;
+	cin >> startv;
+	cout << "Inserisci il vertice di arrivo" << endl;
+	cin >> endv;
     try {
         PolygonalMesh mesh = generateGeodesicMesh(p, q, b);
         std::vector<bool> Vertonpath;
