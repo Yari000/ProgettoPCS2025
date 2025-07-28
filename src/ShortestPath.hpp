@@ -12,8 +12,8 @@ namespace PolygonalLibrary {
 		unsigned int endVertex,
 		std::vector<bool>& vertexOnPath,
 		std::vector<bool>& edgeOnPath,
-                double& pathLength,
-                unsigned& numedgeOnPath);
+	    double& pathLength,
+		unsigned& numedgeOnPath);
 
 }
 

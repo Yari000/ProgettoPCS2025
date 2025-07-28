@@ -42,26 +42,26 @@ void PolygonalLibrary::computeShortestPath(
 	unsigned int endVertex,
 	std::vector<bool>& vertexOnPath,
 	std::vector<bool>& edgeOnPath,
-        double& pathLength,
-        unsigned& numedgesOnPath)
+    double& pathLength,
+    unsigned& numedgesOnPath)
 
 { 
 
 const auto& coords = mesh.Cell0DsCoordinates; 
-numedgesOnPath=0;
+numedgesOnPath = 0; 
 
 // crea una matrice di adiacenza per il grafo
 std::unordered_map<int, std::vector<std::pair<int, double>>> graph;
-for (int i = 0; i < mesh.NumCell1Ds; ++i) {
+for (unsigned int i = 0; i < mesh.NumCell1Ds; ++i) {
     unsigned v1 = mesh.Cell1DsExtrema(i, 0);
     unsigned v2 = mesh.Cell1DsExtrema(i, 1);
-    double length = edgeLength(coords, v1, v2);
+	double length = edgeLength(coords, v1, v2);
     graph[v1].emplace_back(v2, length);
     graph[v2].emplace_back(v1, length);   // aggiunge la distanza  tra i vertici alla matrice
 }
 
 
-// implementazione dell'algoritmo di Dijkstra per trovare il cammino pi  breve
+// implementazione dell'algoritmo di Dijkstra per trovare il cammino più breve
 std::vector<double> dist(mesh.NumVertices, std::numeric_limits<double>::infinity());
 std::vector<int> prev(mesh.NumVertices, -1);
 dist[startVertex] = 0.0;
@@ -73,7 +73,7 @@ while (!queue.empty()) {
     auto [d, u] = queue.top(); queue.pop();
 
 	if (u == endVertex) break; // se raggiunge il vertice di arrivo, esce
-    if (d > dist[u]) continue; // se la distanza   gi  maggiore, salta
+    if (d > dist[u]) continue; // se la distanza è già maggiore, salta
 
     for (auto [v, len] : graph[u]) {
         if (dist[u] + len < dist[v]) {
@@ -85,7 +85,7 @@ while (!queue.empty()) {
 }
 
 
-// trova il cammino pi  breve tra il vertice di partenza e quello di arrivo
+// trova il cammino più breve tra il vertice di partenza e quello di arrivo
 vertexOnPath.resize(mesh.NumVertices, false);
 edgeOnPath.resize(mesh.NumEdges, false);
 
@@ -100,11 +100,12 @@ for (int v = endVertex; prev[v] != -1; v = prev[v]) {
             int a = mesh.Cell1DsExtrema(e, 0);
             int b = mesh.Cell1DsExtrema(e, 1);
             if ((a == u && b == v) || (a == v && b == u)) {
-                edgeOnPath[e] = true; // segna gli edge sul cammino
-                numedgesOnPath= numedgesOnPath+1;
+                edgeOnPath[e] = true;  // segna gli edge sul cammino
+                numedgesOnPath =numedgesOnPath + 1;
                 break;
 			}
         }
 	}
-pathLength= dist[endVertex];
+
+pathLength =dist[endVertex];
 }

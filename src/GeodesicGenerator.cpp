@@ -12,13 +12,17 @@
 
 namespace PolygonalLibrary {
 
-    PolygonalMesh generateGeodesicMesh(unsigned int p, unsigned int q, unsigned int b) {
+    PolygonalMesh generateGeodesicMesh(unsigned int p, unsigned int q, unsigned int b, unsigned int c) {
 
         // genera la mesh basata sui solidi platonici di base
         PolygonalMesh mesh;
         if (p != 3 and q != 3) {
             throw std::runtime_error("solo solidi con facce triangolari e loro duali sono supportati (p,q=3)");
         }
+
+        if (c>=1 and b!=c) {
+            throw std::runtime_error("b!=c non supportato");
+		}
 
         std::vector<Eigen::Vector3d> verts;
         std::vector<std::array<unsigned, 3>> tris;
@@ -42,21 +46,25 @@ namespace PolygonalLibrary {
 
 
         // suddivisione della mesh
-        subdivideGeometry_T(verts, tris, b,overts,otris);
+        if (c == 0) {
+            subdivideGeometry_T(verts, tris, b, overts, otris);
+        }
+        else {
+			subdivideGeometry_T2(verts, tris, b, overts, otris);
+        }
 
         
         // calcolo del duale della mesh
-        if (q == 3 and p != 3) {
+        if (q==3 and p!=3) {
             std::vector<Eigen::Vector3d> dualVerts;
             std::vector<std::vector<unsigned>> dualFaces;
             computeDualMesh(overts, otris, dualVerts, dualFaces);
 
-            overts = dualVerts;
-	    otris = dualFaces;
-            }
+			overts = dualVerts;
+			otris = dualFaces;
         }
         
-        if (p == 3) {
+        if (p==3) {
             std::vector<std::vector<unsigned>> polyFaces;
             for (const auto& tri : otris) {
                 polyFaces.push_back({ tri[0], tri[1], tri[2] });
@@ -68,7 +76,7 @@ namespace PolygonalLibrary {
 
         // assegnazione dei dati alla structure della mesh
 
-        //Cell0Ds
+        // Cell0Ds
         mesh.NumCell0Ds = overts.size();
         mesh.Cell0DsCoordinates.resize(mesh.NumCell0Ds, 3);
         for (unsigned i = 0; i < overts.size(); ++i) {
@@ -76,11 +84,11 @@ namespace PolygonalLibrary {
             mesh.Cell0DsId.push_back(i);
         }
         
-        //Cell2Ds
+        // Cell2Ds
         mesh.NumCell2Ds = otris.size();
         mesh.Cell2DsId.resize(otris.size());
-        mesh.NumVerticesPerCell2D.resize(otris.size());
-	mesh.NumEdgesPerCell2D.resize(otris.size());
+		mesh.NumVerticesPerCell2D.resize(otris.size());
+		mesh.NumEdgesPerCell2D.resize(otris.size());
         mesh.Cell2DsVertices.resize(otris.size());
         for (unsigned i = 0; i < otris.size(); ++i) {
             const auto& face = otris[i];
@@ -91,26 +99,27 @@ namespace PolygonalLibrary {
         }
             
             
-        //Cell3Ds
+        // Cell3Ds
         mesh.NumVertices = mesh.NumCell0Ds;
         mesh.NumFaces = mesh.NumCell2Ds;
 
-        mesh.NumCell3Ds= 1;
-        mesh.Cell3DsId= {0};
+        mesh.NumCell3Ds = 1;
+        mesh.Cell3DsId = { 0 };
         mesh.Cell3DsVertices.resize(1);
-	mesh.Cell3DsEdges.resize(1);
-	mesh.Cell3DsFaces.resize(1);
+		mesh.Cell3DsEdges.resize(1);
+		mesh.Cell3DsFaces.resize(1);
 
         for (unsigned i = 0; i < mesh.NumCell0Ds; ++i) {
             mesh.Cell3DsVertices[0].push_back(i);
 		}
-        
+
+
         // Cell1Ds
         std::map<std::pair<unsigned, unsigned>, unsigned> edgeMap;
         mesh.Cell1DsId.clear();
-	mesh.Cell1DsExtrema.resize(0, 2);
+		mesh.Cell1DsExtrema.resize(0, 2);
 
-	unsigned edgeCount= 0;
+		unsigned edgeCount = 0;
         for (unsigned f = 0; f < otris.size(); ++f) {
             const auto& face = otris[f];
             std::vector<unsigned> edgeIds;
@@ -129,7 +138,7 @@ namespace PolygonalLibrary {
             mesh.Cell2DsEdges.push_back(edgeIds);
         }
 
-        // costruzione degli estremi dei lati
+        // costruzione degli estermi dei lati
 		mesh.NumCell1Ds = edgeMap.size();
 		mesh.Cell1DsExtrema.resize(mesh.NumCell1Ds, 2);
         for (const auto& [edge, id] : edgeMap) {
@@ -139,11 +148,10 @@ namespace PolygonalLibrary {
 
 		mesh.NumEdges = mesh.NumCell1Ds;
 
-		
-                for (unsigned i = 0; i < mesh.NumCell1Ds; ++i) {
+		for (unsigned i=0; i < mesh.NumCell1Ds; ++i) {
 			mesh.Cell3DsEdges[0].push_back(i);
 		}
-		for (unsigned i = 0; i < mesh.NumCell2Ds; ++i) {
+		for (unsigned i=0; i < mesh.NumCell2Ds; ++i) {
 			mesh.Cell3DsFaces[0].push_back(i);  
 		}
 

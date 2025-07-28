@@ -8,7 +8,7 @@
 
 namespace PolygonalLibrary {
 
-	PolygonalMesh generateGeodesicMesh(unsigned int p, unsigned int q, unsigned int b);
+	PolygonalMesh generateGeodesicMesh(unsigned int p, unsigned int q, unsigned int b, unsigned int c);
 
 }
 

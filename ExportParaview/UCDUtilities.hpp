@@ -19,15 +19,14 @@
 
 // Author: Fabio Vicini <fabio.vicini@polito.it>
 
-#ifndef __UCDUtilities_H
-#define __UCDUtilities_H
+#pragma once
 
 #include "Eigen/Eigen"
 #include <list>
 #include <string>
 
-namespace Gedim
-{
+namespace Gedim {
+
 template <typename T>
 struct UCDProperty final
 {
@@ -130,4 +129,4 @@ public:
 };
 }
 
-#endif // __UCDUtilities_H
+
