@@ -64,8 +64,8 @@ int main() {
 
         std::cout << "\nEsempio primo vertice: "
             << mesh.Cell0DsCoordinates.row(0) << "\n";
-		std::cout << "Lunghezza del percorso più breve: " << pathLength << "\n";
- 
+		std::cout << "Lunghezza del percorso piu' breve: " << pathLength << "\n";
+                std::cout<<"numero di lati coinvolti:" <<numedgesOnPath<<"\n";
 
 
         {
